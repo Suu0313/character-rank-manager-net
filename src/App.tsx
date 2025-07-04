@@ -171,6 +171,4 @@ function App() {
   );
 }
 
-// インポート用コンポーネントはAppの外に定義
-
 export default App
