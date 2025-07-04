@@ -10,12 +10,12 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <nav style={{ textAlign: 'center', margin: '1em 0' }}>
-        <Link to="/" style={{ marginRight: 16 }}>ホーム</Link>
-        <Link to="/reference">参考情報</Link>
+        <Link to="/character-rank-manager-net/" style={{ marginRight: 16 }}>ホーム</Link>
+        <Link to="/character-rank-manager-net/reference">参考情報</Link>
       </nav>
       <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/reference" element={<ReferencePage />} />
+        <Route path="/character-rank-manager-net/" element={<App />} />
+        <Route path="/character-rank-manager-net/reference" element={<ReferencePage />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>
