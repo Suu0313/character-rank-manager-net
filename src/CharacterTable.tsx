@@ -79,8 +79,8 @@ const CharacterTable: React.FC<Props> = ({ characters, selected, setSelected, cu
               onMouseEnter={() => handleRowMouseEnter(chara._idx)}
               style={{
                 userSelect: 'none',
-                background: selected[chara._idx] ? '#b3c6e8' : undefined,
-                color: selected[chara._idx] ? '#222' : undefined
+                background: selected[chara._idx] ? '#6f8bc1' : undefined,
+                color: selected[chara._idx] ? '#000' : undefined
               }}
             >
               <td style={{ border: '1px solid #ccc', padding: 4, textAlign: 'center' }}>
