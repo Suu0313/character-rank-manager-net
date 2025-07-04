@@ -66,3 +66,5 @@ export function calculateRequiredExp(currentRank: number, targetRank: number, is
   }
   return { exp, statue, rainbow };
 }
+
+export const irodorimidoriCharacters = [] as const;
