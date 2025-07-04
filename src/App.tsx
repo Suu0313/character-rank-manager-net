@@ -2,7 +2,7 @@ import  { useEffect, useState } from 'react';
 import './App.css';
 import CharacterTable from './CharacterTable';
 import ImportCharacters from './ImportCharacters';
-import { calculateRequiredExp } from './utils';
+import { calculateRequiredExp, irodorimidoriCharacters } from './utils';
 
 type Character = {
   name: string;
@@ -21,6 +21,7 @@ function App() {
   const [customRanks, setCustomRanks] = useState<{ [id: number]: string }>({});
   const [filter, setFilter] = useState('');
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
+  const [selectedLocked, setSelectedLocked] = useState(false);
 
   useEffect(() => {
     const data = localStorage.getItem('chuni_characters');
@@ -89,7 +90,7 @@ function App() {
       ) : (
         <>
           <div style={{ marginBottom: 24, display: 'flex', gap: 12 }}>
-            <button onClick={() => setShowImport(true)} style={{ padding: '6px 16px' }}>
+            <button onClick={() => setShowImport(!showImport)} style={{ padding: '6px 16px' }}>
               再インポート・上書き
             </button>
             <button
@@ -113,23 +114,41 @@ function App() {
               }}
             />
           ) : null}
-          <div style={{ marginBottom: 16 }}>
+          <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
               type="text"
               value={filter}
               onChange={e => setFilter(e.target.value)}
               placeholder="名前でフィルタ"
-              style={{ marginRight: 8, padding: 4 }}
+              style={{ padding: 4, flex: 1 }}
+              list="irodori-list"
             />
+            <datalist id="irodori-list">
+              {irodorimidoriCharacters.map(name => (
+                <option value={name} key={name} />
+              ))}
+            </datalist>
             <button
               onClick={() => setShowSelectedOnly(v => !v)}
               style={{
                 padding: '4px 12px',
-                background: showSelectedOnly ? '#def' : undefined,
+                background: showSelectedOnly ? '#b3c6e8' : undefined, // CharacterTableと同じ色
+                color: showSelectedOnly ? '#222' : undefined,
                 border: '1px solid #99c'
               }}
             >
               {showSelectedOnly ? '全キャラ表示' : '選択中のみ表示'}
+            </button>
+            <button
+              onClick={() => setSelectedLocked(v => !v)}
+              style={{
+                padding: '4px 12px',
+                background: selectedLocked ? '#b3c6e8' : undefined,
+                color: selectedLocked ? '#222' : undefined,
+                border: '1px solid #99c'
+              }}
+            >
+              {selectedLocked ? '選択ロック中' : '選択ロック'}
             </button>
           </div>
           <div style={{ marginBottom: 8 }}>
@@ -141,7 +160,7 @@ function App() {
           <CharacterTable
             characters={filtered}
             selected={selected}
-            setSelected={setSelected}
+            setSelected={selectedLocked ? () => {} : setSelected}
             customRanks={customRanks}
             setCustomRanks={setCustomRanks}
           />

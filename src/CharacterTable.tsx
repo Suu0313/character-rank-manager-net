@@ -18,7 +18,42 @@ type Props = {
   setCustomRanks: React.Dispatch<React.SetStateAction<{ [id: number]: string }>>;
 };
 
+
+import { useState } from 'react';
+
 const CharacterTable: React.FC<Props> = ({ characters, selected, setSelected, customRanks, setCustomRanks }) => {
+  const [isMouseDown, setIsMouseDown] = useState(false);
+  const [dragSelecting, setDragSelecting] = useState<boolean | null>(null); // true: select, false: deselect
+
+  // 範囲選択用
+  const handleRowMouseDown = (idx: number, checked: boolean, e: React.MouseEvent) => {
+    // 入力部クリック時は何もしない
+    const tag = (e.target as HTMLElement).tagName;
+    if (tag === 'INPUT' || tag === 'BUTTON' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+
+    setSelected(sel => ({ ...sel, [idx]: !sel[idx] }));
+    setIsMouseDown(true);
+    setDragSelecting(!checked); // ドラッグ開始時の状態
+  };
+
+  const handleRowMouseEnter = (idx: number) => {
+    if (isMouseDown && dragSelecting !== null) {
+      setSelected(sel => ({ ...sel, [idx]: dragSelecting }));
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsMouseDown(false);
+    setDragSelecting(null);
+  };
+
+  React.useEffect(() => {
+    if (isMouseDown) {
+      window.addEventListener('mouseup', handleMouseUp);
+      return () => window.removeEventListener('mouseup', handleMouseUp);
+    }
+  }, [isMouseDown]);
+
   return (
     <table style={{ borderCollapse: 'collapse', width: '100%' }}>
       <thead>
@@ -38,7 +73,16 @@ const CharacterTable: React.FC<Props> = ({ characters, selected, setSelected, cu
           const customRank = customRanks[chara._idx] ? parseInt(customRanks[chara._idx]) : originalRank;
           const { exp, statue, rainbow } = calculateRequiredExp(originalRank, customRank, chara.isMax);
           return (
-            <tr key={chara._idx}>
+            <tr
+              key={chara._idx}
+              onMouseDown={e => handleRowMouseDown(chara._idx, !!selected[chara._idx], e)}
+              onMouseEnter={() => handleRowMouseEnter(chara._idx)}
+              style={{
+                userSelect: 'none',
+                background: selected[chara._idx] ? '#b3c6e8' : undefined,
+                color: selected[chara._idx] ? '#222' : undefined
+              }}
+            >
               <td style={{ border: '1px solid #ccc', padding: 4, textAlign: 'center' }}>
                 <input
                   type="checkbox"
@@ -49,6 +93,7 @@ const CharacterTable: React.FC<Props> = ({ characters, selected, setSelected, cu
                       [chara._idx]: e.target.checked
                     }))
                   }
+                  onClick={e => e.stopPropagation()}
                 />
               </td>
               <td style={{ border: '1px solid #ccc', padding: 4 }}>
@@ -71,6 +116,7 @@ const CharacterTable: React.FC<Props> = ({ characters, selected, setSelected, cu
                     const v = e.target.value;
                     setCustomRanks(r => ({ ...r, [chara._idx]: v }));
                   }}
+                  onClick={e => e.stopPropagation()}
                 />
               </td>
               <td style={{ border: '1px solid #ccc', padding: 4, fontSize: 12 }}>

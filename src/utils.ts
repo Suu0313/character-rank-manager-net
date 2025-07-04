@@ -67,4 +67,19 @@ export function calculateRequiredExp(currentRank: number, targetRank: number, is
   return { exp, statue, rainbow };
 }
 
-export const irodorimidoriCharacters = [] as const;
+export const irodorimidoriCharacters = [
+  "明坂 芹菜",
+  "御形 アリシアナ",
+  "天王洲 なずな",
+  "小仏 凪",
+  "箱部 なる",
+  "月鈴 那知",
+  "月鈴 白奈",
+  "五十嵐 撫子",
+  "萩原 七々瀬",
+  "葛城 華",
+  "小野 美苗",
+  "藤堂 陽南袴",
+  "桔梗 小夜曲",
+  "芒崎 奏"
+] as const;
