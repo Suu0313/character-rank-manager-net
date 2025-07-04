@@ -26,29 +26,12 @@ function App() {
   }, []);
 
   const bookmarklet =
-    `javascript:(async()=>{const i='ipId14',r=await fetch('https://new.chunithm-net.com/chuni-mobile/html/mobile/collection/characterList/',{credentials:'include'}),d=new DOMParser().parseFromString(await r.text(),'text/html'),c=[...d.querySelectorAll('div.box01[name^="'+i+'"]')].map(e=>{const n=e.querySelector('.character_name_block a')?.textContent.trim()||'',id=e.getAttribute('name')||'';if(id!=i&&!id.startsWith(i+'-'))return;const img=e.querySelector('.list_chara_img img')?.getAttribute('data-original')||'no_image.png',rk=[...e.querySelectorAll('.character_list_rank_num_block img')].map(x=>(x.getAttribute('src')||'').match(/num_s_lv_(\\d)\\.png/)?.[1]||"").join(""),mx=!!e.querySelector('.character_list_rank_max');return{name:n,charaId:id,imgSrc:img,rank:rk,isMax:mx}}).filter(Boolean),t=document.createElement('textarea');t.value=JSON.stringify(c,null,2);t.style='position:fixed;top:10px;left:10px;width:90vw;height:50vh;z-index:9999;';document.body.appendChild(t);t.select();alert('キャラクター情報をテキストエリアに出力しました。全選択→コピーしてReactアプリに貼り付けてください。');})();`;
+    `javascript:(async()=>{const i='ipId14',r=await fetch('https://new.chunithm-net.com/chuni-mobile/html/mobile/collection/characterList/',{credentials:'include'}),d=new DOMParser().parseFromString(await r.text(),'text/html'),c=[...d.querySelectorAll('div.box01[name^="'+i+'"]')].map(e=>{const n=e.querySelector('.character_name_block a')?.textContent.trim()||'',id=e.getAttribute('name')||'';if(id!=i&&!id.startsWith(i+'-'))return;const img=e.querySelector('.list_chara_img img')?.getAttribute('data-original')||'no_image.png',rk=[...e.querySelectorAll('.character_list_rank_num_block img')].map(x=>(x.getAttribute('src')||'').match(/num_s_lv_(\\d)\\.png/)?.[1]||"").join(""),mx=!!e.querySelector('.character_list_rank_max');return{name:n,charaId:id,imgSrc:img,rank:rk,isMax:mx}}).filter(Boolean),t=document.createElement('textarea');t.value=JSON.stringify(c,null,2);t.style='position:fixed;top:10px;left:10px;width:90vw;height:50vh;z-index:9999;';document.body.appendChild(t);t.select();alert('キャラクター情報をテキストエリアに出力しました。全選択→コピーしてツールに貼り付けてください。');})();`;
   return (
     <div style={{ padding: 24 }}>
       <h1>CHUNITHM キャラクター一覧</h1>
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: '1.1em' }}>キャラクター情報保存用ブックマークレット</h2>
-        <p>下記コードをブックマークバーにドラッグ、または右クリックで「リンクをブックマーク」に追加してください。</p>
-        <a
-          href={bookmarklet}
-          style={{
-            display: 'inline-block',
-            background: '#f5f5f5',
-            border: '1px solid #ccc',
-            padding: '6px 12px',
-            borderRadius: 4,
-            color: '#333',
-            textDecoration: 'none',
-            marginBottom: 8,
-            fontWeight: 'bold',
-          }}
-        >
-          CHUNITHMキャラ保存
-        </a>
         <div style={{ marginTop: 8 }}>
           <textarea
             value={bookmarklet}
@@ -58,7 +41,7 @@ function App() {
           />
         </div>
         <p style={{ fontSize: 12, color: '#888' }}>
-          ※キャラクター一覧ページにログインした状態で実行してください。
+          ※CHUNITHM-NET にログインした状態で実行してください。
         </p>
       </section>
       {characters.length === 0 ? (
