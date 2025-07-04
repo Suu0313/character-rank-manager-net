@@ -2,9 +2,11 @@ import  { useEffect, useState } from 'react';
 import './App.css';
 
 type Character = {
-  id: string;
   name: string;
-  rarity: string;
+  charaId: string;
+  imgSrc: string;
+  rank: string;
+  isMax: boolean;
 };
 
 function App() {
@@ -24,7 +26,7 @@ function App() {
   }, []);
 
   const bookmarklet =
-    `javascript:(async function(){\n  const res = await fetch('https://new.chunithm-net.com/chuni-mobile/html/mobile/collection/characterList/', {credentials:'include'});\n  const html = await res.text();\n  const doc = new DOMParser().parseFromString(html, 'text/html');\n  const chars = Array.from(doc.querySelectorAll('.character_list_block')).map(box => ({\n    id: box.querySelector('.list_chara_img img.lazy')?.getAttribute('data-original') || '',\n    name: box.querySelector('.character_name_block a')?.textContent?.trim() || '',\n    rarity: ''\n  }));\n  const json = JSON.stringify(chars, null, 2);\n  let textarea = document.createElement('textarea');\n  textarea.value = json;\n  textarea.style.position = 'fixed';\n  textarea.style.top = '10px';\n  textarea.style.left = '10px';\n  textarea.style.width = '90vw';\n  textarea.style.height = '50vh';\n  textarea.style.zIndex = 9999;\n  document.body.appendChild(textarea);\n  textarea.select();\n  alert('キャラクター情報をテキストエリアに出力しました。全選択→コピーしてReactアプリに貼り付けてください。');\n})();`;
+    `javascript:(async function(){\n  const irodorimidoriId = 'ipId14';\n  const res = await fetch('https://new.chunithm-net.com/chuni-mobile/html/mobile/collection/characterList/', {credentials:'include'});\n  const html = await res.text();\n  const doc = new DOMParser().parseFromString(html, 'text/html');\n  const chars = Array.from(doc.querySelectorAll(\`div.box01[name^="\${irodorimidoriId}"]\`)).map(characterDiv => {\n    const name = characterDiv.querySelector('.character_name_block a')?.textContent.trim() ?? '';\n    const charaId = characterDiv.getAttribute('name') ?? '';\n    if ((charaId != irodorimidoriId) && !(charaId.startsWith(irodorimidoriId + '-'))) return null;\n    const imgSrc = characterDiv.querySelector('.list_chara_img img')?.getAttribute('data-original') || 'no_image.png';\n    let rankImgs = characterDiv.querySelectorAll('.character_list_rank_num_block img') || [];\n    let rank = Array.from(rankImgs)\n      .map(img => img.src.match(/num_s_lv_(\\d)\\.png/)?.[1] || "")\n      .join("");\n    const isMax = characterDiv.querySelector('.character_list_rank_max') !== null;\n    return { name, charaId, imgSrc, rank, isMax };\n  }).filter(Boolean);\n  const json = JSON.stringify(chars, null, 2);\n  let textarea = document.createElement('textarea');\n  textarea.value = json;\n  textarea.style.position = 'fixed';\n  textarea.style.top = '10px';\n  textarea.style.left = '10px';\n  textarea.style.width = '90vw';\n  textarea.style.height = '50vh';\n  textarea.style.zIndex = 9999;\n  document.body.appendChild(textarea);\n  textarea.select();\n  alert('キャラクター情報をテキストエリアに出力しました。全選択→コピーしてReactアプリに貼り付けてください。');\n})();`;
   return (
     <div style={{ padding: 24 }}>
       <h1>CHUNITHM キャラクター一覧</h1>
@@ -91,19 +93,21 @@ function App() {
               <tr>
                 <th style={{ border: '1px solid #ccc', padding: 4 }}>画像</th>
                 <th style={{ border: '1px solid #ccc', padding: 4 }}>名前</th>
-                <th style={{ border: '1px solid #ccc', padding: 4 }}>レアリティ</th>
+                <th style={{ border: '1px solid #ccc', padding: 4 }}>ランク</th>
+                <th style={{ border: '1px solid #ccc', padding: 4 }}>限界</th>
               </tr>
             </thead>
             <tbody>
               {characters.map((chara, idx) => (
                 <tr key={idx}>
                   <td style={{ border: '1px solid #ccc', padding: 4 }}>
-                    {chara.id ? (
-                      <img src={chara.id} alt={chara.name} style={{ height: 48 }} />
+                    {chara.imgSrc ? (
+                      <img src={chara.imgSrc} alt={chara.name} style={{ height: 48 }} />
                     ) : null}
                   </td>
                   <td style={{ border: '1px solid #ccc', padding: 4 }}>{chara.name}</td>
-                  <td style={{ border: '1px solid #ccc', padding: 4 }}>{chara.rarity}</td>
+                  <td style={{ border: '1px solid #ccc', padding: 4 }}>{chara.rank}</td>
+                  <td style={{ border: '1px solid #ccc', padding: 4 }}>{chara.isMax ? '★' : ''}</td>
                 </tr>
               ))}
             </tbody>
