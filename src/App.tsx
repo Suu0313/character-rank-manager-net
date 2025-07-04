@@ -1,5 +1,8 @@
 import  { useEffect, useState } from 'react';
 import './App.css';
+import CharacterTable from './CharacterTable';
+import ImportCharacters from './ImportCharacters';
+import { calculateRequiredExp } from './utils';
 
 type Character = {
   name: string;
@@ -12,10 +15,15 @@ type Character = {
 function App() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [showImport, setShowImport] = useState(false);
+  // 追加: 選択状態・フィルタ・選択のみ表示
+  const [selected, setSelected] = useState<{ [id: number]: boolean }>({});
+  // 目標ランク入力値
+  const [customRanks, setCustomRanks] = useState<{ [id: number]: string }>({});
+  const [filter, setFilter] = useState('');
+  const [showSelectedOnly, setShowSelectedOnly] = useState(false);
 
   useEffect(() => {
     const data = localStorage.getItem('chuni_characters');
-    console.log('Loaded characters from localStorage:', data);
     if (data) {
       try {
         setCharacters(JSON.parse(data));
@@ -24,6 +32,38 @@ function App() {
       }
     }
   }, []);
+
+  // indexをキーに使う
+  // フィルタ適用
+  const filtered = characters
+    .map((c, idx) => ({ ...c, _idx: idx }))
+    .filter(
+      c =>
+        (!showSelectedOnly || selected[c._idx] === true) &&
+        c.name.toLowerCase().includes(filter.toLowerCase())
+    );
+
+  // 合計ランク計算（rankはstringなので数値化）
+  const selectedChars = characters
+    .map((c, idx) => ({ ...c, _idx: idx }))
+    .filter(c => selected[c._idx]);
+  const totalRank = selectedChars.reduce((sum, c) => sum + (parseInt(c.rank) || 0), 0);
+  const totalCustomRank = selectedChars.reduce((sum, c) => {
+    const originalRank = parseInt(c.rank) || 0;
+    const customRank = customRanks[c._idx] ? parseInt(customRanks[c._idx]) : originalRank;
+    return sum + customRank;
+  }, 0);
+
+  // 合計必要経験値・スタチュウ・虹スタチュウ
+  let totalExp = 0, totalStatue = 0, totalRainbow = 0;
+  selectedChars.forEach(c => {
+    const originalRank = parseInt(c.rank) || 0;
+    const customRank = customRanks[c._idx] ? parseInt(customRanks[c._idx]) : originalRank;
+    const { exp, statue, rainbow } = calculateRequiredExp(originalRank, customRank, c.isMax);
+    totalExp += exp;
+    totalStatue += statue;
+    totalRainbow += rainbow;
+  });
 
   const bookmarklet =
     `javascript:(async()=>{const i='ipId14',r=await fetch('https://new.chunithm-net.com/chuni-mobile/html/mobile/collection/characterList/',{credentials:'include'}),d=new DOMParser().parseFromString(await r.text(),'text/html'),c=[...d.querySelectorAll('div.box01[name^="'+i+'"]')].map(e=>{const n=e.querySelector('.character_name_block a')?.textContent.trim()||'',id=e.getAttribute('name')||'';if(id!=i&&!id.startsWith(i+'-'))return;const img=e.querySelector('.list_chara_img img')?.getAttribute('data-original')||'no_image.png',rk=[...e.querySelectorAll('.character_list_rank_num_block img')].map(x=>(x.getAttribute('src')||'').match(/num_s_lv_(\\d)\\.png/)?.[1]||"").join(""),mx=!!e.querySelector('.character_list_rank_max');return{name:n,charaId:id,imgSrc:img,rank:rk,isMax:mx}}).filter(Boolean),t=document.createElement('textarea');t.value=JSON.stringify(c,null,2);t.style='position:fixed;top:10px;left:10px;width:90vw;height:50vh;z-index:9999;';document.body.appendChild(t);t.select();alert('キャラクター情報をテキストエリアに出力しました。全選択→コピーしてツールに貼り付けてください。');})();`;
@@ -57,6 +97,7 @@ function App() {
                 localStorage.removeItem('chuni_characters');
                 setCharacters([]);
                 setShowImport(false);
+                setSelected({});
               }}
               style={{ padding: '6px 16px', background: '#fdd', border: '1px solid #f99', color: '#900' }}
             >
@@ -68,33 +109,43 @@ function App() {
               onImport={chars => {
                 setCharacters(chars);
                 setShowImport(false);
+                setSelected({});
               }}
             />
           ) : null}
-          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-            <thead>
-              <tr>
-                <th style={{ border: '1px solid #ccc', padding: 4 }}>画像</th>
-                <th style={{ border: '1px solid #ccc', padding: 4 }}>名前</th>
-                <th style={{ border: '1px solid #ccc', padding: 4 }}>ランク</th>
-                <th style={{ border: '1px solid #ccc', padding: 4 }}>限界</th>
-              </tr>
-            </thead>
-            <tbody>
-              {characters.map((chara, idx) => (
-                <tr key={idx}>
-                  <td style={{ border: '1px solid #ccc', padding: 4 }}>
-                    {chara.imgSrc ? (
-                      <img src={chara.imgSrc} alt={chara.name} style={{ height: 48 }} />
-                    ) : null}
-                  </td>
-                  <td style={{ border: '1px solid #ccc', padding: 4 }}>{chara.name}</td>
-                  <td style={{ border: '1px solid #ccc', padding: 4 }}>{chara.rank}</td>
-                  <td style={{ border: '1px solid #ccc', padding: 4 }}>{chara.isMax ? '★' : ''}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div style={{ marginBottom: 16 }}>
+            <input
+              type="text"
+              value={filter}
+              onChange={e => setFilter(e.target.value)}
+              placeholder="名前でフィルタ"
+              style={{ marginRight: 8, padding: 4 }}
+            />
+            <button
+              onClick={() => setShowSelectedOnly(v => !v)}
+              style={{
+                padding: '4px 12px',
+                background: showSelectedOnly ? '#def' : undefined,
+                border: '1px solid #99c'
+              }}
+            >
+              {showSelectedOnly ? '全キャラ表示' : '選択中のみ表示'}
+            </button>
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <b>選択キャラ合計ランク: {totalRank}（目標: {totalCustomRank}）</b>
+          </div>
+          <div style={{ marginBottom: 16, fontSize: 14 }}>
+            <b>合計 必要経験値: {totalExp.toLocaleString()} / スタチュウ: {totalStatue.toLocaleString()}個 / 虹スタチュウ: {totalRainbow.toLocaleString()}個</b>
+          </div>
+          <CharacterTable
+            characters={filtered}
+            selected={selected}
+            setSelected={setSelected}
+            customRanks={customRanks}
+            setCustomRanks={setCustomRanks}
+          />
+          {/* 合計表示は上部に移動済み */}
         </>
       )}
     </div>
@@ -102,39 +153,5 @@ function App() {
 }
 
 // インポート用コンポーネントはAppの外に定義
-function ImportCharacters({ onImport }: { onImport: (chars: Character[]) => void }) {
-  const [input, setInput] = useState('');
-  const [error, setError] = useState('');
-
-  const handleImport = () => {
-    try {
-      const chars = JSON.parse(input);
-      if (!Array.isArray(chars)) throw new Error('配列ではありません');
-      onImport(chars);
-      localStorage.setItem('chuni_characters', JSON.stringify(chars));
-      setError('');
-    } catch (e) {
-      setError('JSONの形式が正しくありません');
-    }
-  };
-
-  return (
-    <div style={{ margin: '32px 0' }}>
-      <h2>キャラクター情報インポート</h2>
-      <p>ブックマークレットで出力されたJSONをここに貼り付けてください。</p>
-      <textarea
-        value={input}
-        onChange={e => setInput(e.target.value)}
-        style={{ width: '100%', minHeight: 120, fontSize: 12 }}
-        placeholder="ここにJSONを貼り付け"
-      />
-      <div>
-        <button onClick={handleImport} style={{ marginTop: 8, padding: '6px 16px' }}>インポート</button>
-      </div>
-
-      {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
-    </div>
-  );
-}
 
 export default App
