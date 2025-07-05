@@ -78,7 +78,7 @@ function App() {
             value={bookmarklet}
             readOnly
             style={{ width: '100%', minHeight: 80, fontSize: 12 }}
-            onFocus={e => e.target.select()}
+            onFocus={e => {e.target.select(); e.target.setSelectionRange(0, e.target.value.length);}}
           />
         </div>
         <p style={{ fontSize: 12, color: '#888' }}>
