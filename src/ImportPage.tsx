@@ -31,16 +31,16 @@ const ImportPage: React.FC = () => {
           value={bookmarklet}
           readOnly
           style={{ width: '100%', minHeight: 80, fontSize: 12 }}
-          onFocus={e => {e.target.select(); e.target.setSelectionRange(0, e.target.value.length);}}
+          onFocus={e => setTimeout(() => { e.target.select(); e.target.setSelectionRange(0, e.target.value.length) }, 0)}
         />
       </div>
       <p style={{ fontSize: 12, color: '#888' }}>
         ※CHUNITHM-NET にログインした状態で実行してください。
       </p>
       <p>
-        <a 
-          href="https://new.chunithm-net.com/" 
-          target="_blank" 
+        <a
+          href="https://new.chunithm-net.com/"
+          target="_blank"
           rel="noopener noreferrer"
           style={{ color: '#007acc', textDecoration: 'underline' }}
         >
@@ -66,7 +66,6 @@ const ImportPage: React.FC = () => {
           onClick={() => {
             if (window.confirm('本当に削除（リセット）しますか？この操作は元に戻せません。')) {
               localStorage.removeItem('chuni_characters');
-              navigate('/character-rank-manager-net/');
             }
           }}
           style={{ padding: '6px 16px', background: '#fdd', border: '1px solid #f99', color: '#900' }}
