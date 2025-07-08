@@ -67,6 +67,32 @@ export function calculateRequiredExp(currentRank: number, targetRank: number, is
   return { exp, statue, rainbow };
 }
 
+export function calculateTotalExpFromRank1(rank: number): number {
+  if (rank <= 1) return 0;
+  
+  let totalExp = 0;
+  
+  for (let index = 0; index < expTable.length; index++) {
+    const minRank = index * 5, maxRank = minRank + 4;
+    
+    // If the target rank is before this interval, we're done
+    if (rank <= minRank) break;
+    
+    // Calculate experience for this interval
+    if (rank <= maxRank) {
+      // Partial interval: from minRank to rank
+      const ranksInInterval = rank - Math.max(minRank, 1);
+      totalExp += expTable[index].exp * ranksInInterval;
+    } else {
+      // Full interval: from minRank to maxRank
+      const ranksInInterval = maxRank - Math.max(minRank, 1) + 1;
+      totalExp += expTable[index].exp * ranksInInterval;
+    }
+  }
+  
+  return totalExp;
+}
+
 export const irodorimidoriCharacters = [
   "明坂 芹菜",
   "御形 アリシアナ",

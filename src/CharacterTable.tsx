@@ -1,5 +1,5 @@
 import React from 'react';
-import { calculateRequiredExp } from './utils';
+import { calculateRequiredExp, calculateTotalExpFromRank1 } from './utils';
 
 type Character = {
   name: string;
@@ -64,6 +64,7 @@ const CharacterTable: React.FC<Props> = ({ characters, selected, setSelected, cu
           <th style={{ border: '1px solid #ccc', padding: 4 }}>ランク</th>
           <th style={{ border: '1px solid #ccc', padding: 4 }}>限界</th>
           <th style={{ border: '1px solid #ccc', padding: 4 }}>目標RANK</th>
+          <th style={{ border: '1px solid #ccc', padding: 4 }}>進捗</th>
           <th style={{ border: '1px solid #ccc', padding: 4 }}>必要経験値等</th>
         </tr>
       </thead>
@@ -72,6 +73,12 @@ const CharacterTable: React.FC<Props> = ({ characters, selected, setSelected, cu
           const originalRank = parseInt(chara.rank) || 0;
           const customRank = customRanks[chara._idx] ? parseInt(customRanks[chara._idx]) : originalRank;
           const { exp, statue, rainbow } = calculateRequiredExp(originalRank, customRank, chara.isMax);
+          
+          // 進捗計算：入力した目標ランクについて, ランク1から現在のランクまでの経験値合計/ランク1から目標ランクまでの経験値合計
+          const currentExpFromRank1 = calculateTotalExpFromRank1(originalRank);
+          const targetExpFromRank1 = calculateTotalExpFromRank1(customRank);
+          const progress = targetExpFromRank1 > 0 ? (currentExpFromRank1 / targetExpFromRank1) * 100 : 0;
+          
           return (
             <tr
               key={chara._idx}
@@ -118,6 +125,28 @@ const CharacterTable: React.FC<Props> = ({ characters, selected, setSelected, cu
                   }}
                   onClick={e => e.stopPropagation()}
                 />
+              </td>
+              <td style={{ border: '1px solid #ccc', padding: 4, fontSize: 12 }}>
+                {customRanks[chara._idx] && customRank > originalRank ? (
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: 11, marginBottom: 2 }}>
+                      {progress.toFixed(1)}%
+                    </div>
+                    <div style={{ background: '#f0f0f0', height: 8, borderRadius: 4, overflow: 'hidden' }}>
+                      <div 
+                        style={{ 
+                          background: '#4CAF50', 
+                          height: '100%', 
+                          width: `${Math.min(progress, 100)}%`,
+                          transition: 'width 0.3s ease'
+                        }}
+                      />
+                    </div>
+                    <div style={{ fontSize: 9, color: '#666', marginTop: 1 }}>
+                      {currentExpFromRank1.toLocaleString()}/{targetExpFromRank1.toLocaleString()}
+                    </div>
+                  </div>
+                ) : null}
               </td>
               <td style={{ border: '1px solid #ccc', padding: 4, fontSize: 12 }}>
                 {customRanks[chara._idx] ? (

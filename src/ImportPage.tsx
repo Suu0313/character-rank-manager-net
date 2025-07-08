@@ -14,7 +14,7 @@ const ImportPage: React.FC = () => {
       localStorage.setItem('chuni_characters', JSON.stringify(chars));
       setError('');
       navigate('/character-rank-manager-net/');
-    } catch (e) {
+    } catch {
       setError('JSONの形式が正しくありません');
     }
   };
