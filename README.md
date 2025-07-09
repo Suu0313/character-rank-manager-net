@@ -1,69 +1,65 @@
-# React + TypeScript + Vite
+# CHUNITHM キャラクターランク管理ツール
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CHUNITHMのキャラクターランク管理を効率化するWebアプリケーションです。
 
-Currently, two official plugins are available:
+## 📖 概要
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+このツールは、CHUNITHM-NETからキャラクター情報を取得し、ランクアップに必要な経験値や素材を計算・管理するためのWebアプリケーションです。キャラクターの選択、フィルタリング、目標ランクの設定などができます。
 
-## Expanding the ESLint configuration
+## 🌐 アプリケーションへのアクセス
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+**▶️ [キャラクターランク管理ツールを使用する](https://Suu0313.github.io/character-rank-manager-net/)**
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## ✨ 主な機能
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### 1. キャラクター管理
+- **ホーム**: キャラクターの一覧表示と選択機能
+- **フィルタリング**: 名前でキャラクターを絞り込み
+- **選択機能**: 複数キャラクターの選択と選択のみ表示
+- **ランク計算**: 選択したキャラクターの合計ランクと必要経験値を計算
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 2. データインポート
+- **インポート**: CHUNITHM-NETからキャラクター情報を簡単取得
+- **ブックマークレット**: ワンクリックでキャラクター情報を抽出
+- **JSONインポート**: 手動でのデータ入力も可能
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 3. 参考情報
+- **参考情報**: キャラクターランクに関する詳細情報を表示
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🚀 使用方法
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 1. キャラクター情報の取得
+1. [インポートページ](https://Suu0313.github.io/character-rank-manager-net/import)にアクセス
+2. 提供されているブックマークレットをブラウザのブックマークに追加
+3. [CHUNITHM-NET](https://new.chunithm-net.com/)にログイン
+4. キャラクター一覧ページでブックマークレットを実行
+5. 出力されたJSONデータをコピーしてインポートページに貼り付け
+
+### 2. キャラクター管理
+1. [ホームページ](https://Suu0313.github.io/character-rank-manager-net/)でキャラクター一覧を確認
+2. 名前でフィルタリングしてキャラクターを絞り込み
+3. 育成したいキャラクターを選択
+4. 目標ランクを設定して必要経験値を確認
+
+### 3. 参考情報の確認
+1. [参考情報ページ](https://Suu0313.github.io/character-rank-manager-net/reference)でランクアップに必要な素材や経験値を確認
+
+## 🛠️ 技術スタック
+
+- **フロントエンド**: React 19 + TypeScript
+- **ルーティング**: React Router DOM
+- **ビルドツール**: Vite
+- **デプロイ**: GitHub Pages
+- **スタイリング**: CSS + インラインスタイル
+
+## 📝 ライセンス
+
+MIT License
+
+## 🤝 貢献
+
+プルリクエストや Issue の報告を歓迎します。
+
+---
+
+**注意**: このツールはファンメイドのツールです。公式のCHUNITHMサービスとは関係ありません。
