@@ -127,7 +127,7 @@ const CharacterTable: React.FC<Props> = ({ characters, selected, setSelected, cu
                 />
               </td>
               <td style={{ border: '1px solid #ccc', padding: 4, fontSize: 12 }}>
-                {customRanks[chara._idx] && customRank > originalRank ? (
+                {customRanks[chara._idx] && customRank >= originalRank ? (
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: 11, marginBottom: 2 }}>
                       {progress.toFixed(1)}%
