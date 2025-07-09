@@ -67,6 +67,16 @@ export function calculateRequiredExp(currentRank: number, targetRank: number, is
   return { exp, statue, rainbow };
 }
 
+/**
+ * Calculate total experience required from rank 1 to a given rank
+ * Used for progress display calculations
+ * @param rank - Target rank (1-200)
+ * @returns Total experience points required from rank 1 to target rank
+ */
+export function calculateTotalExpFromRank1(rank: number): number {
+  return calculateRequiredExp(1, rank, false).exp;
+}
+
 export const irodorimidoriCharacters = [
   "明坂 芹菜",
   "御形 アリシアナ",

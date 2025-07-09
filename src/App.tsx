@@ -1,7 +1,7 @@
 import  { useEffect, useState } from 'react';
 import './App.css';
 import CharacterTable from './CharacterTable';
-import { calculateRequiredExp, irodorimidoriCharacters } from './utils';
+import { calculateRequiredExp, calculateTotalExpFromRank1, irodorimidoriCharacters } from './utils';
 
 type Character = {
   name: string;
@@ -27,7 +27,7 @@ function App() {
     if (data) {
       try {
         setCharacters(JSON.parse(data));
-      } catch (e) {
+      } catch {
         setCharacters([]);
       }
     }
@@ -64,6 +64,21 @@ function App() {
     totalStatue += statue;
     totalRainbow += rainbow;
   });
+
+  // 進捗表示の計算
+  // 1. 選択中の合計について、ランク1から現在のランクまでの経験値の合計/目標ランクまでの合計
+  const totalCurrentExpFromRank1 = selectedChars.reduce((sum, c) => {
+    const originalRank = parseInt(c.rank) || 0;
+    return sum + calculateTotalExpFromRank1(originalRank);
+  }, 0);
+
+  const totalTargetExpFromRank1 = selectedChars.reduce((sum, c) => {
+    const originalRank = parseInt(c.rank) || 0;
+    const customRank = customRanks[c._idx] ? parseInt(customRanks[c._idx]) : originalRank;
+    return sum + calculateTotalExpFromRank1(customRank);
+  }, 0);
+
+  const totalProgress = totalTargetExpFromRank1 > 0 ? (totalCurrentExpFromRank1 / totalTargetExpFromRank1) * 100 : 0;
 
   return (
     <div style={{ padding: 24 }}>
@@ -108,9 +123,27 @@ function App() {
       <div style={{ marginBottom: 8 }}>
         <b>選択キャラ合計ランク: {totalRank}（目標: {totalCustomRank}）</b>
       </div>
-      <div style={{ marginBottom: 16, fontSize: 14 }}>
+      <div style={{ marginBottom: 8, fontSize: 14 }}>
         <b>合計 必要経験値: {totalExp.toLocaleString()} / スタチュウ: {totalStatue.toLocaleString()}個 / 虹スタチュウ: {totalRainbow.toLocaleString()}個</b>
       </div>
+      {selectedChars.length > 0 && (
+        <div style={{ marginBottom: 16, fontSize: 14 }}>
+          <b>選択中合計進捗: {totalProgress.toFixed(1)}%</b>
+          <div style={{ background: '#f0f0f0', height: 20, borderRadius: 10, overflow: 'hidden', marginTop: 4 }}>
+            <div 
+              style={{ 
+                background: '#4CAF50', 
+                height: '100%', 
+                width: `${Math.min(totalProgress, 100)}%`,
+                transition: 'width 0.3s ease'
+              }}
+            />
+          </div>
+          <div style={{ fontSize: 12, color: '#666', marginTop: 2 }}>
+            現在の経験値: {totalCurrentExpFromRank1.toLocaleString()} / 目標経験値: {totalTargetExpFromRank1.toLocaleString()}
+          </div>
+        </div>
+      )}
       <CharacterTable
         characters={filtered}
         selected={selected}
