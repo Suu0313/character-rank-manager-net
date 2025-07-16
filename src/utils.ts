@@ -93,3 +93,28 @@ export const irodorimidoriCharacters = [
   "桔梗 小夜曲",
   "芒崎 奏"
 ] as const;
+
+/**
+ * Simple compression using base64 encoding for URL parameters
+ * For larger data, we could use LZ-string, but base64 should be sufficient for most cases
+ */
+export function compressData(data: string): string {
+  try {
+    return btoa(encodeURIComponent(data));
+  } catch (error) {
+    console.error('Failed to compress data:', error);
+    return '';
+  }
+}
+
+/**
+ * Decompress data that was compressed with compressData
+ */
+export function decompressData(compressedData: string): string {
+  try {
+    return decodeURIComponent(atob(compressedData));
+  } catch (error) {
+    console.error('Failed to decompress data:', error);
+    return '';
+  }
+}
