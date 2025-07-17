@@ -94,6 +94,8 @@ export const irodorimidoriCharacters = [
   "芒崎 奏"
 ] as const;
 
+import LZString from 'lz-string';
+
 /**
  * Character data structure for compression
  */
@@ -122,7 +124,7 @@ export function compressCharacterData(characters: CharacterData[]): string {
       char.rank,
       char.isMax ? 1 : 0
     ]);
-    return btoa(encodeURIComponent(JSON.stringify(compressed)));
+    return LZString.compressToEncodedURIComponent(JSON.stringify(compressed));
   } catch (error) {
     console.error('Failed to compress character data:', error);
     return '';
@@ -134,7 +136,22 @@ export function compressCharacterData(characters: CharacterData[]): string {
  */
 export function decompressCharacterData(compressedData: string): CharacterData[] {
   try {
-    const decompressed = JSON.parse(decodeURIComponent(atob(compressedData)));
+    let decompressed;
+    
+    // Try LZ-string decompression first (new format)
+    try {
+      const lzDecompressed = LZString.decompressFromEncodedURIComponent(compressedData);
+      if (lzDecompressed) {
+        decompressed = JSON.parse(lzDecompressed);
+      } else {
+        throw new Error('LZ-string decompression failed');
+      }
+    } catch (lzError) {
+      // Fallback to old base64 format for backward compatibility
+      console.log('Falling back to base64 decoding');
+      decompressed = JSON.parse(decodeURIComponent(atob(compressedData)));
+    }
+    
     if (!Array.isArray(decompressed)) {
       throw new Error('Decompressed data is not an array');
     }
