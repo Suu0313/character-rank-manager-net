@@ -139,24 +139,25 @@ export function decompressCharacterData(compressedData: string): CharacterData[]
       throw new Error('Decompressed data is not an array');
     }
     
-    return decompressed.map((item: any) => {
+    return decompressed.map((item: unknown) => {
       if (Array.isArray(item) && item.length === 5) {
         // New compressed format: [name, charaId, imgFile, rank, isMax]
         return {
-          name: item[0],
-          charaId: item[1],
-          imgSrc: item[2].startsWith('http') ? item[2] : IMAGE_BASE_URL + item[2],
-          rank: item[3],
+          name: String(item[0]),
+          charaId: String(item[1]),
+          imgSrc: String(item[2]).startsWith('http') ? String(item[2]) : IMAGE_BASE_URL + String(item[2]),
+          rank: String(item[3]),
           isMax: Boolean(item[4])
         };
       } else if (typeof item === 'object' && item !== null) {
         // Old format: full object (for backward compatibility)
+        const obj = item as Record<string, unknown>;
         return {
-          name: item.name || '',
-          charaId: item.charaId || '',
-          imgSrc: item.imgSrc || '',
-          rank: item.rank || '',
-          isMax: Boolean(item.isMax)
+          name: String(obj.name || ''),
+          charaId: String(obj.charaId || ''),
+          imgSrc: String(obj.imgSrc || ''),
+          rank: String(obj.rank || ''),
+          isMax: Boolean(obj.isMax)
         };
       } else {
         throw new Error('Invalid item format');
