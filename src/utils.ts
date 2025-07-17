@@ -136,21 +136,13 @@ export function compressCharacterData(characters: CharacterData[]): string {
  */
 export function decompressCharacterData(compressedData: string): CharacterData[] {
   try {
-    let decompressed;
-    
-    // Try LZ-string decompression first (new format)
-    try {
-      const lzDecompressed = LZString.decompressFromEncodedURIComponent(compressedData);
-      if (lzDecompressed) {
-        decompressed = JSON.parse(lzDecompressed);
-      } else {
-        throw new Error('LZ-string decompression failed');
-      }
-    } catch (lzError) {
-      // Fallback to old base64 format for backward compatibility
-      console.log('Falling back to base64 decoding');
-      decompressed = JSON.parse(decodeURIComponent(atob(compressedData)));
+    // Use LZ-string decompression 
+    const lzDecompressed = LZString.decompressFromEncodedURIComponent(compressedData);
+    if (!lzDecompressed) {
+      throw new Error('LZ-string decompression failed');
     }
+    
+    const decompressed = JSON.parse(lzDecompressed);
     
     if (!Array.isArray(decompressed)) {
       throw new Error('Decompressed data is not an array');
