@@ -95,7 +95,81 @@ export const irodorimidoriCharacters = [
 ] as const;
 
 /**
- * Simple compression using base64 encoding for URL parameters
+ * Character data structure for compression
+ */
+interface CharacterData {
+  name: string;
+  charaId: string;
+  imgSrc: string;
+  rank: string;
+  isMax: boolean;
+}
+
+/**
+ * Base URL for character images
+ */
+const IMAGE_BASE_URL = "https://new.chunithm-net.com/chuni-mobile/html/mobile/img/";
+
+/**
+ * Convert character data to compressed array format
+ */
+export function compressCharacterData(characters: CharacterData[]): string {
+  try {
+    const compressed = characters.map(char => [
+      char.name,
+      char.charaId,
+      char.imgSrc.startsWith(IMAGE_BASE_URL) ? char.imgSrc.substring(IMAGE_BASE_URL.length) : char.imgSrc,
+      char.rank,
+      char.isMax ? 1 : 0
+    ]);
+    return btoa(encodeURIComponent(JSON.stringify(compressed)));
+  } catch (error) {
+    console.error('Failed to compress character data:', error);
+    return '';
+  }
+}
+
+/**
+ * Decompress compressed array format back to character data
+ */
+export function decompressCharacterData(compressedData: string): CharacterData[] {
+  try {
+    const decompressed = JSON.parse(decodeURIComponent(atob(compressedData)));
+    if (!Array.isArray(decompressed)) {
+      throw new Error('Decompressed data is not an array');
+    }
+    
+    return decompressed.map((item: any) => {
+      if (Array.isArray(item) && item.length === 5) {
+        // New compressed format: [name, charaId, imgFile, rank, isMax]
+        return {
+          name: item[0],
+          charaId: item[1],
+          imgSrc: item[2].startsWith('http') ? item[2] : IMAGE_BASE_URL + item[2],
+          rank: item[3],
+          isMax: Boolean(item[4])
+        };
+      } else if (typeof item === 'object' && item !== null) {
+        // Old format: full object (for backward compatibility)
+        return {
+          name: item.name || '',
+          charaId: item.charaId || '',
+          imgSrc: item.imgSrc || '',
+          rank: item.rank || '',
+          isMax: Boolean(item.isMax)
+        };
+      } else {
+        throw new Error('Invalid item format');
+      }
+    });
+  } catch (error) {
+    console.error('Failed to decompress character data:', error);
+    return [];
+  }
+}
+
+/**
+ * Simple compression using base64 encoding for URL parameters (legacy function)
  * For larger data, we could use LZ-string, but base64 should be sufficient for most cases
  */
 export function compressData(data: string): string {
@@ -108,7 +182,7 @@ export function compressData(data: string): string {
 }
 
 /**
- * Decompress data that was compressed with compressData
+ * Decompress data that was compressed with compressData (legacy function)
  */
 export function decompressData(compressedData: string): string {
   try {
