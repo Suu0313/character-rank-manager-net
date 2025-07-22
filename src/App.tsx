@@ -23,64 +23,54 @@ function App() {
   const [selectedLocked, setSelectedLocked] = useState(false);
 
   // キャラクター選択状態の保存
-  const saveSelectedState = (newSelected: { [id: number]: boolean }, chars: Character[]) => {
-    // array indexからcharaIdベースのマップに変換
-    const selectedByCharaId: { [charaId: string]: boolean } = {};
-    Object.entries(newSelected).forEach(([idx, isSelected]) => {
-      const char = chars[parseInt(idx)];
-      if (char && isSelected) {
-        selectedByCharaId[char.charaId] = true;
-      }
-    });
-    localStorage.setItem('chuni_selected', JSON.stringify(selectedByCharaId));
+  const saveSelectedState = (newSelected: { [id: number]: boolean }) => {
+    localStorage.setItem('chuni_selected', JSON.stringify(newSelected));
   };
 
   // カスタムランク状態の保存
-  const saveCustomRanksState = (newCustomRanks: { [id: number]: string }, chars: Character[]) => {
-    // array indexからcharaIdベースのマップに変換
-    const customRanksByCharaId: { [charaId: string]: string } = {};
-    Object.entries(newCustomRanks).forEach(([idx, rank]) => {
-      const char = chars[parseInt(idx)];
-      if (char && rank) {
-        customRanksByCharaId[char.charaId] = rank;
-      }
-    });
-    localStorage.setItem('chuni_custom_ranks', JSON.stringify(customRanksByCharaId));
+  const saveCustomRanksState = (newCustomRanks: { [id: number]: string }) => {
+    localStorage.setItem('chuni_custom_ranks', JSON.stringify(newCustomRanks));
+  };
+
+  // 配列長の保存
+  const saveArrayLength = (length: number) => {
+    localStorage.setItem('chuni_array_length', length.toString());
   };
 
   // 保存されている状態の復元
   const loadPersistedState = (chars: Character[]) => {
     try {
+      // 配列長をチェックして、変更されていたら保存済みデータを削除
+      const savedLength = localStorage.getItem('chuni_array_length');
+      if (savedLength && parseInt(savedLength) !== chars.length) {
+        localStorage.removeItem('chuni_selected');
+        localStorage.removeItem('chuni_custom_ranks');
+        saveArrayLength(chars.length);
+        return;
+      }
+
       // 選択状態の復元
       const savedSelected = localStorage.getItem('chuni_selected');
       if (savedSelected) {
-        const selectedByCharaId = JSON.parse(savedSelected);
-        const newSelected: { [id: number]: boolean } = {};
-        chars.forEach((char, idx) => {
-          if (selectedByCharaId[char.charaId]) {
-            newSelected[idx] = true;
-          }
-        });
-        setSelected(newSelected);
+        const selectedData = JSON.parse(savedSelected);
+        setSelected(selectedData);
       }
 
       // カスタムランク状態の復元
       const savedCustomRanks = localStorage.getItem('chuni_custom_ranks');
       if (savedCustomRanks) {
-        const customRanksByCharaId = JSON.parse(savedCustomRanks);
-        const newCustomRanks: { [id: number]: string } = {};
-        chars.forEach((char, idx) => {
-          if (customRanksByCharaId[char.charaId]) {
-            newCustomRanks[idx] = customRanksByCharaId[char.charaId];
-          }
-        });
-        setCustomRanks(newCustomRanks);
+        const customRanksData = JSON.parse(savedCustomRanks);
+        setCustomRanks(customRanksData);
       }
+
+      // 配列長を保存
+      saveArrayLength(chars.length);
     } catch (error) {
       console.error('Failed to load persisted state:', error);
       // エラー時は無効なデータを削除
       localStorage.removeItem('chuni_selected');
       localStorage.removeItem('chuni_custom_ranks');
+      localStorage.removeItem('chuni_array_length');
     }
   };
 
@@ -217,7 +207,7 @@ function App() {
             const actualSelected = typeof newSelected === 'function' ? newSelected(selected) : newSelected;
             setSelected(actualSelected);
             // 状態変更時に保存
-            saveSelectedState(actualSelected, characters);
+            saveSelectedState(actualSelected);
           }
         }}
         customRanks={customRanks}
@@ -225,7 +215,7 @@ function App() {
           const actualCustomRanks = typeof newCustomRanks === 'function' ? newCustomRanks(customRanks) : newCustomRanks;
           setCustomRanks(actualCustomRanks);
           // 状態変更時に保存
-          saveCustomRanksState(actualCustomRanks, characters);
+          saveCustomRanksState(actualCustomRanks);
         }}
       />
     </div>
