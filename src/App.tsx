@@ -22,11 +22,66 @@ function App() {
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const [selectedLocked, setSelectedLocked] = useState(false);
 
+  // キャラクター選択状態の保存
+  const saveSelectedState = (newSelected: { [id: number]: boolean }) => {
+    localStorage.setItem('chuni_selected', JSON.stringify(newSelected));
+  };
+
+  // カスタムランク状態の保存
+  const saveCustomRanksState = (newCustomRanks: { [id: number]: string }) => {
+    localStorage.setItem('chuni_custom_ranks', JSON.stringify(newCustomRanks));
+  };
+
+  // 配列長の保存
+  const saveArrayLength = (length: number) => {
+    localStorage.setItem('chuni_array_length', length.toString());
+  };
+
+  // 保存されている状態の復元
+  const loadPersistedState = (chars: Character[]) => {
+    try {
+      // 配列長をチェックして、変更されていたら保存済みデータを削除
+      const savedLength = localStorage.getItem('chuni_array_length');
+      if (savedLength && parseInt(savedLength) !== chars.length) {
+        localStorage.removeItem('chuni_selected');
+        localStorage.removeItem('chuni_custom_ranks');
+        saveArrayLength(chars.length);
+        return;
+      }
+
+      // 選択状態の復元
+      const savedSelected = localStorage.getItem('chuni_selected');
+      if (savedSelected) {
+        const selectedData = JSON.parse(savedSelected);
+        setSelected(selectedData);
+      }
+
+      // カスタムランク状態の復元
+      const savedCustomRanks = localStorage.getItem('chuni_custom_ranks');
+      if (savedCustomRanks) {
+        const customRanksData = JSON.parse(savedCustomRanks);
+        setCustomRanks(customRanksData);
+      }
+
+      // 配列長を保存
+      saveArrayLength(chars.length);
+    } catch (error) {
+      console.error('Failed to load persisted state:', error);
+      // エラー時は無効なデータを削除
+      localStorage.removeItem('chuni_selected');
+      localStorage.removeItem('chuni_custom_ranks');
+      localStorage.removeItem('chuni_array_length');
+    }
+  };
+
   useEffect(() => {
     const data = localStorage.getItem('chuni_characters');
     if (data) {
       try {
-        setCharacters(JSON.parse(data));
+        const chars = JSON.parse(data);
+        setCharacters(chars);
+        // キャラクターデータ読み込み後に保存されている状態を復元
+        loadPersistedState(chars);
       } catch {
         setCharacters([]);
       }
@@ -147,9 +202,21 @@ function App() {
       <CharacterTable
         characters={filtered}
         selected={selected}
-        setSelected={selectedLocked ? () => {} : setSelected}
+        setSelected={(newSelected) => {
+          if (!selectedLocked) {
+            const actualSelected = typeof newSelected === 'function' ? newSelected(selected) : newSelected;
+            setSelected(actualSelected);
+            // 状態変更時に保存
+            saveSelectedState(actualSelected);
+          }
+        }}
         customRanks={customRanks}
-        setCustomRanks={setCustomRanks}
+        setCustomRanks={(newCustomRanks) => {
+          const actualCustomRanks = typeof newCustomRanks === 'function' ? newCustomRanks(customRanks) : newCustomRanks;
+          setCustomRanks(actualCustomRanks);
+          // 状態変更時に保存
+          saveCustomRanksState(actualCustomRanks);
+        }}
       />
     </div>
   );
