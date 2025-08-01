@@ -219,6 +219,7 @@ const ImportPage: React.FC = () => {
                           <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>キャラクター名</th>
                           <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center' }}>変更前</th>
                           <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center' }}>変更後</th>
+                          <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center' }}>経験値</th>
                           <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center' }}>限界</th>
                         </tr>
                       </thead>
@@ -229,7 +230,10 @@ const ImportPage: React.FC = () => {
                             <tr key={index} style={{ background: '#fff' }}>
                               <td style={{ border: '1px solid #ccc', padding: '4px' }}>{diff.name}</td>
                               <td style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center' }}>{diff.oldRank}</td>
-                              <td style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', background: '#d4edda' }}>{diff.newRank}</td>
+                              <td style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', background: '#d4edda', color: '#155724' }}>{diff.newRank}</td>
+                              <td style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', color: '#28a745', fontWeight: 'bold' }}>
+                                {diff.expDifference > 0 ? `+${diff.expDifference}` : ''}
+                              </td>
                               <td style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center' }}>{diff.isMax ? '★' : ''}</td>
                             </tr>
                           ))

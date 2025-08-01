@@ -212,6 +212,7 @@ export interface CharacterDiff {
   newRank: string;
   hasChanged: boolean;
   isMax: boolean;
+  expDifference: number; // Experience points gained
 }
 
 /**
@@ -246,12 +247,20 @@ export function compareCharacterArrays(
       const oldChar = oldCharacters[i];
       const newChar = newCharacters[i];
       
+      // Calculate experience difference
+      const oldRankNum = parseInt(oldChar.rank) || 0;
+      const newRankNum = parseInt(newChar.rank) || 0;
+      const expDifference = oldRankNum < newRankNum 
+        ? calculateRequiredExp(oldRankNum, newRankNum, oldChar.isMax).exp
+        : 0;
+      
       differences.push({
         name: newChar.name,
         oldRank: oldChar.rank,
         newRank: newChar.rank,
         hasChanged: oldChar.rank !== newChar.rank,
-        isMax: newChar.isMax
+        isMax: newChar.isMax,
+        expDifference
       });
     }
   }
