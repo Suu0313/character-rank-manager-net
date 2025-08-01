@@ -211,7 +211,6 @@ export interface CharacterDiff {
   oldRank: string;
   newRank: string;
   hasChanged: boolean;
-  isMax: boolean;
   expDifference: number; // Experience points gained
 }
 
@@ -259,7 +258,6 @@ export function compareCharacterArrays(
         oldRank: oldChar.rank,
         newRank: newChar.rank,
         hasChanged: oldChar.rank !== newChar.rank,
-        isMax: newChar.isMax,
         expDifference
       });
     }

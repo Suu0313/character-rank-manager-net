@@ -129,8 +129,8 @@ const ImportPage: React.FC = () => {
         <summary style={{ cursor: 'pointer', fontSize: '14px', color: '#666', userSelect: 'none' }}>
           上のブックマークレットが上手く動かない人はこちら
         </summary>
-        <div style={{ marginTop: 12, padding: '12px', background: '#f9f9f9', border: '1px solid #ddd', borderRadius: '4px' }}>
-          <h3 style={{ fontSize: '1em', marginTop: 0, marginBottom: 8 }}>手動コピー専用ブックマークレット</h3>
+        <div style={{ marginTop: 12, padding: '12px', background: '#e5eaefff', border: '1px solid #ddd', borderRadius: '4px' }}>
+          <h3 style={{ fontSize: '1em', color: '#666', marginTop: 0, marginBottom: 8 }}>手動コピー専用ブックマークレット</h3>
           <textarea
             value={bookmarkletManual}
             readOnly
@@ -172,7 +172,7 @@ const ImportPage: React.FC = () => {
             padding: '12px', 
             border: '1px solid #ddd', 
             borderRadius: '4px',
-            background: '#f9f9f9' 
+            background: '#3e3e3eff' 
           }}>
             <h3 style={{ marginTop: 0, marginBottom: '8px', fontSize: '14px' }}>インポート差分</h3>
             
@@ -188,19 +188,19 @@ const ImportPage: React.FC = () => {
                 <br />
                 現在: {comparisonResult.oldLength}体 → インポート後: {comparisonResult.newLength}体
                 <br />
-                詳細な差分は表示されません。
+                詳細な差分は表示されません。（入力内容もクリアされます）
               </div>
             ) : (
               <div>
                 <div style={{ 
                   padding: '8px 12px', 
-                  background: '#d1ecf1', 
+                  background: '#d1ecf1ff', 
                   border: '1px solid #bee5eb', 
                   borderRadius: '4px',
                   color: '#0c5460',
                   marginBottom: '8px'
                 }}>
-                  キャラクター数が同じです（{comparisonResult.newLength}体）。ランク変更を確認できます。
+                  キャラクター数が同じです（{comparisonResult.newLength}人）。ランク変更を確認できます。
                 </div>
                 
                 {comparisonResult.differences.filter(diff => diff.hasChanged).length === 0 ? (
@@ -215,26 +215,24 @@ const ImportPage: React.FC = () => {
                   <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
                     <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
                       <thead>
-                        <tr style={{ background: '#e9ecef' }}>
-                          <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>キャラクター名</th>
-                          <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center' }}>変更前</th>
-                          <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center' }}>変更後</th>
-                          <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center' }}>経験値</th>
-                          <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center' }}>限界</th>
+                        <tr style={{ background: '#bdcad7ff' }}>
+                          <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left', color: '#0c5460' }}>キャラクター名</th>
+                          <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', color: '#0c5460' }}>変更前</th>
+                          <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', color: '#0c5460' }}>変更後</th>
+                          <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', color: '#0c5460' }}>経験値</th>
                         </tr>
                       </thead>
                       <tbody>
                         {comparisonResult.differences
                           .filter(diff => diff.hasChanged)
                           .map((diff, index) => (
-                            <tr key={index} style={{ background: '#fff' }}>
-                              <td style={{ border: '1px solid #ccc', padding: '4px' }}>{diff.name}</td>
-                              <td style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center' }}>{diff.oldRank}</td>
+                            <tr key={index} style={{ background: '#e5eaefff' }}>
+                              <td style={{ border: '1px solid #ccc', padding: '4px', color: '#0c5460' }}>{diff.name}</td>
+                              <td style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', color: '#0c5460' }}>{diff.oldRank}</td>
                               <td style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', background: '#d4edda', color: '#155724' }}>{diff.newRank}</td>
                               <td style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', color: '#28a745', fontWeight: 'bold' }}>
                                 {diff.expDifference > 0 ? `+${diff.expDifference}` : ''}
                               </td>
-                              <td style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center' }}>{diff.isMax ? '★' : ''}</td>
                             </tr>
                           ))
                         }
@@ -255,13 +253,13 @@ const ImportPage: React.FC = () => {
       <div style={{ marginBottom: 24, display: 'flex', gap: 12 }}>
         <button
           onClick={() => {
-            if (window.confirm('本当に削除（リセット）しますか？この操作は元に戻せません。')) {
+            if (window.confirm('本当に削除しますか？この操作は元に戻せません。')) {
               localStorage.removeItem('chuni_characters');
             }
           }}
           style={{ padding: '6px 16px', background: '#fdd', border: '1px solid #f99', color: '#900' }}
         >
-          削除（リセット）
+          削除
         </button>
       </div>
     </div>
