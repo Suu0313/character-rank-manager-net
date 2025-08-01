@@ -1,14 +1,43 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
-import { decompressData, decompressCharacterData } from './utils';
+import { decompressData, decompressCharacterData, compareCharacterArrays } from './utils';
+import type { ComparisonResult } from './utils';
 
 const ImportPage: React.FC = () => {
   const [input, setInput] = useState('');
   const [error, setError] = useState('');
   const [autoImported, setAutoImported] = useState(false);
+  const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleInputChange = React.useCallback((value: string) => {
+    setInput(value);
+    
+    // Clear previous comparison when input changes
+    setComparisonResult(null);
+    
+    // Try to parse the new input and compare with existing data
+    if (value.trim()) {
+      try {
+        const newChars = JSON.parse(value);
+        if (Array.isArray(newChars)) {
+          // Get current stored characters
+          const currentData = localStorage.getItem('chuni_characters');
+          if (currentData) {
+            const currentChars = JSON.parse(currentData);
+            if (Array.isArray(currentChars)) {
+              const comparison = compareCharacterArrays(currentChars, newChars);
+              setComparisonResult(comparison);
+            }
+          }
+        }
+      } catch {
+        // Ignore parsing errors for incomplete input
+      }
+    }
+  }, []);
 
   // Check for query parameters on component mount
   useEffect(() => {
@@ -20,7 +49,9 @@ const ImportPage: React.FC = () => {
         // Try new compressed format first
         const characterData = decompressCharacterData(compressedData);
         if (characterData && characterData.length > 0) {
-          setInput(JSON.stringify(characterData, null, 2));
+          const jsonString = JSON.stringify(characterData, null, 2);
+          setInput(jsonString);
+          handleInputChange(jsonString); // Trigger comparison
           setAutoImported(true);
           // Clear the URL parameters for cleaner UI
           const newUrl = location.pathname;
@@ -30,6 +61,7 @@ const ImportPage: React.FC = () => {
           const decompressedData = decompressData(compressedData);
           if (decompressedData) {
             setInput(decompressedData);
+            handleInputChange(decompressedData); // Trigger comparison
             setAutoImported(true);
             // Clear the URL parameters for cleaner UI
             const newUrl = location.pathname;
@@ -41,7 +73,7 @@ const ImportPage: React.FC = () => {
         setError('URLパラメータからのデータ読み込みに失敗しました');
       }
     }
-  }, [location.search, location.pathname, autoImported]);
+  }, [location.search, location.pathname, autoImported, handleInputChange]);
 
   const handleImport = () => {
     try {
@@ -49,6 +81,7 @@ const ImportPage: React.FC = () => {
       if (!Array.isArray(chars)) throw new Error('配列ではありません');
       localStorage.setItem('chuni_characters', JSON.stringify(chars));
       setError('');
+      setComparisonResult(null); // Clear comparison result after successful import
       navigate('/character-rank-manager-net/');
     } catch {
       setError('JSONの形式が正しくありません');
@@ -96,8 +129,8 @@ const ImportPage: React.FC = () => {
         <summary style={{ cursor: 'pointer', fontSize: '14px', color: '#666', userSelect: 'none' }}>
           上のブックマークレットが上手く動かない人はこちら
         </summary>
-        <div style={{ marginTop: 12, padding: '12px', background: '#f9f9f9', border: '1px solid #ddd', borderRadius: '4px' }}>
-          <h3 style={{ fontSize: '1em', marginTop: 0, marginBottom: 8 }}>手動コピー専用ブックマークレット</h3>
+        <div style={{ marginTop: 12, padding: '12px', background: '#e5eaefff', border: '1px solid #ddd', borderRadius: '4px' }}>
+          <h3 style={{ fontSize: '1em', color: '#666', marginTop: 0, marginBottom: 8 }}>手動コピー専用ブックマークレット</h3>
           <textarea
             value={bookmarkletManual}
             readOnly
@@ -127,10 +160,91 @@ const ImportPage: React.FC = () => {
         <p>ブックマークレットで出力されたJSONをここに貼り付けてください。</p>
         <textarea
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={e => handleInputChange(e.target.value)}
           style={{ width: '100%', minHeight: 120, fontSize: 12 }}
           placeholder="ここにJSONを貼り付け"
         />
+        
+        {/* Comparison Result Display */}
+        {comparisonResult && (
+          <div style={{ 
+            marginTop: '16px', 
+            padding: '12px', 
+            border: '1px solid #ddd', 
+            borderRadius: '4px',
+            background: '#3e3e3eff' 
+          }}>
+            <h3 style={{ marginTop: 0, marginBottom: '8px', fontSize: '14px' }}>インポート差分</h3>
+            
+            {!comparisonResult.canCompare ? (
+              <div style={{ 
+                padding: '8px 12px', 
+                background: '#fff3cd', 
+                border: '1px solid #ffeaa7', 
+                borderRadius: '4px',
+                color: '#856404'
+              }}>
+                <strong>新規獲得キャラクターがいます</strong>
+                <br />
+                現在: {comparisonResult.oldLength}体 → インポート後: {comparisonResult.newLength}体
+                <br />
+                詳細な差分は表示されません。（入力内容もクリアされます）
+              </div>
+            ) : (
+              <div>
+                <div style={{ 
+                  padding: '8px 12px', 
+                  background: '#d1ecf1ff', 
+                  border: '1px solid #bee5eb', 
+                  borderRadius: '4px',
+                  color: '#0c5460',
+                  marginBottom: '8px'
+                }}>
+                  キャラクター数が同じです（{comparisonResult.newLength}人）。ランク変更を確認できます。
+                </div>
+                
+                {comparisonResult.differences.filter(diff => diff.hasChanged).length === 0 ? (
+                  <div style={{ 
+                    padding: '8px', 
+                    color: '#666', 
+                    fontStyle: 'italic' 
+                  }}>
+                    ランクに変更はありません。
+                  </div>
+                ) : (
+                  <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                    <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ background: '#bdcad7ff' }}>
+                          <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left', color: '#0c5460' }}>キャラクター名</th>
+                          <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', color: '#0c5460' }}>変更前</th>
+                          <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', color: '#0c5460' }}>変更後</th>
+                          <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', color: '#0c5460' }}>経験値</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {comparisonResult.differences
+                          .filter(diff => diff.hasChanged)
+                          .map((diff, index) => (
+                            <tr key={index} style={{ background: '#e5eaefff' }}>
+                              <td style={{ border: '1px solid #ccc', padding: '4px', color: '#0c5460' }}>{diff.name}</td>
+                              <td style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', color: '#0c5460' }}>{diff.oldRank}</td>
+                              <td style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', background: '#d4edda', color: '#155724' }}>{diff.newRank}</td>
+                              <td style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'center', color: '#28a745', fontWeight: 'bold' }}>
+                                {diff.expDifference > 0 ? `+${diff.expDifference}` : ''}
+                              </td>
+                            </tr>
+                          ))
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+        
         <div>
           <button onClick={handleImport} style={{ marginTop: 8, padding: '6px 16px' }}>インポート</button>
         </div>
@@ -139,13 +253,13 @@ const ImportPage: React.FC = () => {
       <div style={{ marginBottom: 24, display: 'flex', gap: 12 }}>
         <button
           onClick={() => {
-            if (window.confirm('本当に削除（リセット）しますか？この操作は元に戻せません。')) {
+            if (window.confirm('本当に削除しますか？この操作は元に戻せません。')) {
               localStorage.removeItem('chuni_characters');
             }
           }}
           style={{ padding: '6px 16px', background: '#fdd', border: '1px solid #f99', color: '#900' }}
         >
-          削除（リセット）
+          削除
         </button>
       </div>
     </div>
