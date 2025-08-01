@@ -88,6 +88,23 @@ const ImportPage: React.FC = () => {
     }
   };
 
+  const handleExport = () => {
+    try {
+      const data = localStorage.getItem('chuni_characters');
+      if (data) {
+        const chars = JSON.parse(data);
+        const formattedJson = JSON.stringify(chars, null, 2);
+        setInput(formattedJson);
+        handleInputChange(formattedJson); // Trigger comparison
+        setError('');
+      } else {
+        setError('保存されているデータがありません');
+      }
+    } catch {
+      setError('データの読み込みに失敗しました');
+    }
+  };
+
 
   // ブックマークレット - 外部スクリプトを読み込む短縮版
   const bookmarklet = 
@@ -260,6 +277,12 @@ const ImportPage: React.FC = () => {
           style={{ padding: '6px 16px', background: '#fdd', border: '1px solid #f99', color: '#900' }}
         >
           削除
+        </button>
+        <button
+          onClick={handleExport}
+          style={{ padding: '6px 16px', background: '#dfd', border: '1px solid #9d9', color: '#090' }}
+        >
+          エクスポート
         </button>
       </div>
     </div>
