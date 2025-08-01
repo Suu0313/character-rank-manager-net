@@ -202,3 +202,65 @@ export function decompressData(compressedData: string): string {
     return '';
   }
 }
+
+/**
+ * Character comparison result for showing differences
+ */
+export interface CharacterDiff {
+  name: string;
+  oldRank: string;
+  newRank: string;
+  hasChanged: boolean;
+  isMax: boolean;
+}
+
+/**
+ * Result of comparing character arrays
+ */
+export interface ComparisonResult {
+  canCompare: boolean; // true if array lengths are same
+  hasNewCharacters: boolean; // true if array length increased
+  differences: CharacterDiff[];
+  oldLength: number;
+  newLength: number;
+}
+
+/**
+ * Compare two character arrays and return differences
+ * Only provides detailed comparison if array lengths are the same
+ */
+export function compareCharacterArrays(
+  oldCharacters: CharacterData[], 
+  newCharacters: CharacterData[]
+): ComparisonResult {
+  const oldLength = oldCharacters.length;
+  const newLength = newCharacters.length;
+  const canCompare = oldLength === newLength;
+  const hasNewCharacters = newLength > oldLength;
+  
+  const differences: CharacterDiff[] = [];
+  
+  if (canCompare) {
+    // Safe to compare by index when lengths are the same
+    for (let i = 0; i < oldLength; i++) {
+      const oldChar = oldCharacters[i];
+      const newChar = newCharacters[i];
+      
+      differences.push({
+        name: newChar.name,
+        oldRank: oldChar.rank,
+        newRank: newChar.rank,
+        hasChanged: oldChar.rank !== newChar.rank,
+        isMax: newChar.isMax
+      });
+    }
+  }
+  
+  return {
+    canCompare,
+    hasNewCharacters,
+    differences,
+    oldLength,
+    newLength
+  };
+}
